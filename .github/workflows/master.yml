@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-      description: "Docker image tag"
-      required: true
-      default: "v1"
+        description: "Docker image tag"
+        required: true
+        default: "v1"
 
 env:
   DOCKER_IMAGE: brandza99/ci-cd-scratch-challenge
