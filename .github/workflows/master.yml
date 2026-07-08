@@ -13,7 +13,7 @@ on:
 
 env:
   DOCKER_IMAGE: brandza99/ci-cd-scratch-challenge
-  IMAGE_TAG: ${{github.event.inputs.image_tag}}
+  IMAGE_TAG: ${{ github.event.inputs.image_tag }}
 
 jobs:
   ci-cd-scratch:
