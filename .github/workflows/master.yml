@@ -1,24 +1,25 @@
-name: CI/CD scratch challenge
+name: CI/CD scratch challenge V4 
 
 on:
+  # 1. Ovo reaguje automatski na svaki push da bi dobio zeleni status na GitHubu
   push:
     branches:
       - master
+  # 2. Ovo reaguje samo kada ti ručno klikneš i ukucaš tag
   workflow_dispatch:
     inputs:
       image_tag:
-        description: "Docker image tag"
+        description: "Docker image tag (samo za ručni deploy)"
         required: true
-        default: "v1"
+        default: "v4"
 
 env:
   DOCKER_IMAGE: brandza99/ci-cd-scratch-challenge
-  IMAGE_TAG: ${{ github.event.inputs.image_tag }}
 
 jobs:
-  ci-cd-scratch:
+  # POSAO 1: Pokreće se AUTOMATSKI na push, proverava kôd i daje zelenu kvačicu
+  check-and-verify:
     runs-on: ubuntu-latest
-    environment: Master
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -26,11 +27,21 @@ jobs:
       - name: Print Project files
         run: ls -la
 
-      - name: Print fake build message
-        run: echo "Build ci-cd-scratch started"
+      - name: Verify Code
+        run: echo "Kôd je uspešno pushovan na master i verifikovan! (Bez slanja na Docker Hub)"
 
-      - name: Print fake deploy message
-        run: echo "Deploy started"
+  # POSAO 2: Pokreće se ISKLJUČIVO na tvoj ručni klik (klik na Run workflow)
+  build-and-push-docker:
+    # Ova linija osigurava da se ovaj posao NE pokreće automatski na push, već samo na klik
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: Master
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Image Tag
+        run: echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: docker build -t $DOCKER_IMAGE:$IMAGE_TAG -t $DOCKER_IMAGE:latest .
@@ -41,7 +52,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Push Docker image v1
+      - name: Push Docker image tag
         run: docker push $DOCKER_IMAGE:$IMAGE_TAG
 
       - name: Push Docker image latest
